@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { getUsuarios, postUsuarios, putUsuario } from '../../services/usuarioService';
+// import { getUsuarios} from '../../services/usuarioService';
 import { UsuarioRowTable } from './UsuarioRowTable';
-import swal from 'sweetalert2';
 import serverConfig from '../../config/server';
 
 
@@ -11,19 +10,24 @@ export const UsuariosView = () => {
   const { nombre = '', email = '', estado = '' } = valoresForm
   const [usuarios, setUsuarios] = useState([]);
 
-
-  const listarUsuarios = async () => {
-    try {
-      const { data } = await getUsuarios(); //desestructuro la respuesta y solo recibo data
-      setUsuarios(data)
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   useEffect(() => {
-    listarUsuarios()
+    getUsuarios()
   }, [])
+
+  const getUsuarios = async() => {
+    // await fetch(`${serverConfig.urlBaseServer}/usuario/usuariolist`,{
+    await fetch(`http://localhost:4000/usuario/userlist`,{
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    }).then(res => res.json())
+      .then(resp => {
+        //console.log(resp)
+        setUsuarios(resp.usuarios)
+      })
+  }
 
   const handleOnChange = ({ target }) => { // va a recibir los valores de los input del formulario
     const { name, value } = target
@@ -36,38 +40,23 @@ export const UsuariosView = () => {
     const usuario = {
       nombre, email, estado
     }
-    console.log(usuario);
+    console.log(usuario)
     await fetch(`${serverConfig.urlBaseServer}/usuario/create`,
     {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify(usuario),
-  }).then(resp => resp.json()).then(data=> console.log(data))
-  listarUsuarios()
-  e.target.reset()
-
-
-    // try {
-    //   swal.fire({ // sirve para mostrar alerta de cargando 
-    //     allowOutsideClick: false,
-    //     text: 'Cargando...'
-    //   });
-    //   swal.showLoading(); // se llama la alerta de cargando
-    //   const { data } = await postUsuarios(usuario)
-    //   console.log(data);
-    //   swal.close();
-    //   listarUsuarios()
-    //   e.target.reset()
-    // } catch (error) {
-    //   console.log(error);
-    //   swal.close();
-    // }
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(usuario),
+    })
+      .then(resp => resp.json())
+      .then(data=> {
+        console.log(data)
+        getUsuarios()
+        e.target.reset()
+      })
   }
-
-
 
   return (
     <div className='container-fluid'>
@@ -131,7 +120,7 @@ export const UsuariosView = () => {
                 {
                   usuarios.map((usuario) => {
 
-                    return <UsuarioRowTable key={usuario._id} usuario={usuario} usuarios={usuarios}/>
+                    return <UsuarioRowTable key={usuario._id} usuariolis={getUsuarios()} usuario={usuario} usuarios={usuarios}/>
                   })
                 }
               </tbody>

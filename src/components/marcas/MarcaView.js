@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { getMarcas, postMarcas } from '../../services/marcaService'
 import swal from 'sweetalert2'
 import { MarcaRowTable } from './MarcaRowTable'
+import serverConfig from '../../config/server';
 
 
 
@@ -33,31 +34,31 @@ export const MarcaView = () => {
 
   const handleOnSubmit = async (e) => {
     e.preventDefault();
-    console.log(valoresForm)
+    //console.log(valoresForm)
     const marca = {
       nombre, estado
     }
     console.log(marca);
-    try {
-      swal.fire({ // sirve para mostrar alerta de cargando 
-        allowOutsideClick: false,
-        text: 'Cargando...'
-      });
-      swal.showLoading(); // se llama la alerta de cargando
-      const { data } = await postMarcas(marca)
-      console.log(data);
-      swal.close();
-      listarMarcas()
-      e.target.reset()
-    } catch (error) {
-      console.log(error);
-      swal.close();
-    }
+    await fetch(`${serverConfig.urlBaseServer}/marca`,
+    {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(marca),
+    })
+      .then(resp => resp.json())
+      .then(data=> {
+        //console.log(data)
+        listarMarcas()
+        e.target.reset()
+      })
   }
   
   // funcion para editar
   const editar = (id, nombre, estado) => {
-    console.log(id, nombre, estado)
+    //console.log(id, nombre, estado)
     setMarca({
       nombre: nombre,
         estado: estado,
@@ -105,7 +106,7 @@ export const MarcaView = () => {
               </div>
               <div className='row'>
                 <div className='col-1 '>
-                  <button className="btn btn-secondary ">Guardar</button>
+                  <button className="btn btn-secondary ">Crear</button>
                 </div>
                 <div className='col-1 '>
                   <input type='reset' value='Cancelar' className="btn btn-danger" />
@@ -128,7 +129,7 @@ export const MarcaView = () => {
                 {
                   marcas.map((marca) => {
 
-                    return <MarcaRowTable key={marca._id} marca={marca} editar={editar}/>
+                    return <MarcaRowTable key={marca._id} listarmarcas={listarMarcas} marca={marca} editar={editar}/>
                   })
                 }
               </tbody>

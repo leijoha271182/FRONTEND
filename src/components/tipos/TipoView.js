@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import swal from 'sweetalert2'
 import {getTipoEquipos , postTipoEquipos } from '../../services/tipoEquipoService'
 import { TipoRowTable } from './TipoRowTable'
+import serverConfig from '../../config/server';
 
 
 export const TipoView = () => {
@@ -36,21 +37,20 @@ const handleOnSubmit = async (e) => {
       nombre, estado
   }
   console.log(tipoEquipo);
-  try {
-      swal.fire({ // sirve para mostrar alerta de cargando 
-          allowOutsideClick:false,
-          text: 'Cargando...'
-      });
-      swal.showLoading(); // se llama la alerta de cargando
-      const { data } = await postTipoEquipos(tipoEquipo)
-      console.log(data);
-      swal.close();
-      listarTipoEquipos()
-      e.target.reset()
-  } catch (error) {
-      console.log(error);
-      swal.close();
-  }
+  await fetch(`${serverConfig.urlBaseServer}/tipo-equipo`, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(tipoEquipo),
+    })
+      .then(resp => resp.json())
+      .then(data=> {
+        //console.log(data)
+        listarTipoEquipos()
+        e.target.reset()
+  })
 }
 
 // funcion para editar
@@ -126,7 +126,7 @@ useEffect(() => {
                 {
                   tipoEquipos.map((tipo) => {
                     
-                    return <TipoRowTable key={tipo._id} tipoEquipo={tipo} editar={editar}/>
+                    return <TipoRowTable key={tipo._id} listarTipoEquipos={listarTipoEquipos} tipoEquipo={tipo} editar={editar}/>
                   })
                 }
               </tbody>

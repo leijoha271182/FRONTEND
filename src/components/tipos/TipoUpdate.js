@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import swal from 'sweetalert2';
 import { getTipoEquipoId, putTipoEquipo } from '../../services/tipoEquipoService';
+import serverConfig from '../../config/server';
 
 export const TipoUpdate = () => {
 
@@ -11,20 +12,18 @@ export const TipoUpdate = () => {
     const { nombre = '', estado = '' } = valoresForm
 
     const getTipo = async () => {
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading();
-            const { data } = await getTipoEquipoId(tipoId);
-            console.log(data);
-            setTipo(data) // se le agrega la data a inventario
-            swal.close()
-        } catch (error) {
-            console.log(error);
-            swal.close()
-        }
+        await fetch(`${serverConfig.urlBaseServer}/tipo-equipo/${tipoId}`,{
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "GET",
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                setTipo(data.tipoEquipo) // se le agrega la data a inventario
+            })
     }
 
     useEffect(() => {
@@ -52,27 +51,18 @@ export const TipoUpdate = () => {
             nombre, estado
         }
 
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading(); // se llama la alerta de cargando
-            const { data } = await putTipoEquipo(tipoId, tipoUpdate)
-            console.log(data);
-            swal.close();
+        await fetch(`${serverConfig.urlBaseServer}/tipo-equipo/${tipoId}`,{
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "PATCH",
+            body: JSON.stringify(tipoUpdate)
+            }).then(res=> res.json())
+            .then(data => {
+            console.log(data)
+        })
 
-        } catch (error) {
-            console.log(error);
-            swal.close();
-            let mensaje;
-            if (error && error.response && error.response.data) {
-                mensaje = error.response.data
-            } else {
-                mensaje = 'Ocurrio un error por favor intente de nuevo'
-            }
-            swal.fire('Error', mensaje, 'error')
-        }
     }
 
 

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getInventarioId, putInventarios } from '../../services/inventarioService';
-import { getUsuarios } from '../../services/usuarioService';
 import { getMarcas } from '../../services/marcaService';
 import { getTipoEquipos } from '../../services/tipoEquipoService';
 import { getEstadoEquipos } from '../../services/estadoEquipoService';
-import swal from 'sweetalert2';
+
+import serverConfig from '../../config/server';
 
 export const InventarioUpdate = () => {
     const { inventarioId = '' } = useParams();
@@ -22,12 +21,18 @@ export const InventarioUpdate = () => {
     const [estadoEquipos, setEstadoEquipos] = useState([]);
 
     const listarUsuarios = async () => {
-        try {
-            const { data } = await getUsuarios(); //desestructuro la respuesta y solo recibo data
-            setUsuarios(data)
-        } catch (error) {
-            console.log(error);
-        }
+        await fetch(`${serverConfig.urlBaseServer}/usuario/userlist`, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "GET",
+        })
+            .then(res => res.json())
+            .then(data => {
+                //console.log(data);
+                setUsuarios(data.usuarios) // se le agrega la data a inventario
+            })
     }
 
     const listarMarcas = async () => {
@@ -74,20 +79,18 @@ export const InventarioUpdate = () => {
     }, [])
 
     const getInventario = async () => {
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick:false,
-                text: 'Cargando...'
-            });
-            swal.showLoading();
-            const { data } = await getInventarioId(inventarioId);
+        await fetch(`${serverConfig.urlBaseServer}/inventario/${inventarioId}`, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "GET",
+        })
+        .then(res => res.json())
+        .then(data => {
             console.log(data);
-            setInventario(data) // se le agrega la data a inventario
-            swal.close()
-        } catch (error) {
-            console.log(error);
-            swal.close()
-        }
+            setInventario(data.inventario) // se le agrega la data a inventario
+        })
     }
 
     useEffect(() => {
@@ -130,27 +133,39 @@ export const InventarioUpdate = () => {
             }
         }
 
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading(); // se llama la alerta de cargando
-            const { data } = await putInventarios(inventarioId, inventario)
-            console.log(data);
-            swal.close();
+        await fetch(`${serverConfig.urlBaseServer}/inventario/${inventarioId}`, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "PATCH",
+            body: JSON.stringify(inventario)
+            }).then(res=> res.json())
+            .then(data => {
+                console.log(data)
+            })
 
-        } catch (error) {
-            console.log(error);
-            swal.close();
-            let mensaje;
-            if (error && error.response && error.response.data ) {
-                mensaje = error.response.data
-            }else{
-                mensaje = 'Ocurrio un error por favor intente de nuevo'
-            }
-            swal.fire('Error',mensaje,'error')
-        }
+        // try {
+        //     swal.fire({ // sirve para mostrar alerta de cargando 
+        //         allowOutsideClick: false,
+        //         text: 'Cargando...'
+        //     });
+        //     swal.showLoading(); // se llama la alerta de cargando
+        //     const { data } = await putInventarios(inventarioId, inventario)
+        //     console.log(data);
+        //     swal.close();
+
+        // } catch (error) {
+        //     console.log(error);
+        //     swal.close();
+        //     let mensaje;
+        //     if (error && error.response && error.response.data ) {
+        //         mensaje = error.response.data
+        //     }else{
+        //         mensaje = 'Ocurrio un error por favor intente de nuevo'
+        //     }
+        //     swal.fire('Error',mensaje,'error')
+        // }
     }
 
     const handleOnChange = ({ target }) => { // va a recibir los valores de los input del formulario
@@ -169,7 +184,7 @@ export const InventarioUpdate = () => {
                 <div className='card-body'>
                     <div className='row'>
                         <div className='col-md-4 col-4 col-sm-12'>
-                            <img src={inventario?.foto}></img>
+                            <img className="picture-adjust img-fluid" src={inventario?.foto}/>
                         </div>
                         <div className='col-md-8 col-8 col-sm-12'>
                             <form onSubmit={(e) => handleOnSubmit(e)}>

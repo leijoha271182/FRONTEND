@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { getEstadoEquipos, postEstadoEquipos } from '../../services/estadoEquipoService'
 import swal from 'sweetalert2'
 import { EstadoRowTable } from './EstadoRowTable'
+import serverConfig from '../../config/server';
 
 export const EstadosView = () => {
 
@@ -31,26 +32,26 @@ const handleOnChange = ({ target }) => { // va a recibir los valores de los inpu
 
 const handleOnSubmit = async (e) => {
   e.preventDefault();
-  console.log(valoresForm)
+  //console.log(valoresForm)
   const estadoNuevo = {
       nombre, estado
   }
-  console.log(estadoNuevo);
-  try {
-      swal.fire({ // sirve para mostrar alerta de cargando 
-          allowOutsideClick:false,
-          text: 'Cargando...'
-      });
-      swal.showLoading(); // se llama la alerta de cargando
-      const { data } = await postEstadoEquipos(estadoNuevo)
-      console.log(data);
-      swal.close();
-      listarEstadoEquipos()
-      e.target.reset()
-  } catch (error) {
-      console.log(error);
-      swal.close();
-  }
+  //console.log(estadoNuevo);
+  await fetch(`${serverConfig.urlBaseServer}/estado-equipo`,{
+    
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify(estadoNuevo),
+    })
+      .then(resp => resp.json())
+      .then(data=> {
+        //console.log(data)
+        listarEstadoEquipos()
+        e.target.reset()
+      })
 }
 
 
@@ -71,9 +72,6 @@ useEffect(() => {
     })
   }
 }, [estadoEquipo])
-
-
-
 
 
   return (
@@ -97,7 +95,7 @@ useEffect(() => {
                 <div className='col-4'>
                   <label className="form-label">Estado</label>
                   <select className="form-select" name='estado'
-                   onChange={(e) => handleOnChange(e) } value={estado} >
+                   onChange={(e) => handleOnChange(e) } value={estado} required>
                     <option value=''>--Seleccionar--</option>
                     <option value='Activo'>Activo</option>
                     <option value='Inactivo'>Inactivo</option>
@@ -130,7 +128,7 @@ useEffect(() => {
                 {
                   estadoEquipos.map((estado) => {
                     
-                    return <EstadoRowTable key={estado._id} estado={estado} editar={editar}/>
+                    return <EstadoRowTable key={estado._id} listarEstadoEquipos={listarEstadoEquipos} estado={estado} editar={editar}/>
                   })
                 }
               </tbody>

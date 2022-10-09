@@ -1,4 +1,4 @@
-import { axiosInstance, AxiosInstance } from "../helpers/axios-config";
+import { axiosInstance } from "../helpers/axios-config";
 
 const getMarcas = () => {
     return axiosInstance.get('marca', { //se llama la ruta deseada en este caso inventario
@@ -12,7 +12,7 @@ const postMarcas = (data) => {
 
     const respuesta = axiosInstance.post('marca', data, { 
         headers: {
-            'Content-type': 'application/json'   
+            'Content-type': 'application/json'
         }
     });
 

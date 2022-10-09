@@ -1,36 +1,37 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { getUsuarioId, putUsuario } from '../../services/usuarioService';
-import swal from 'sweetalert2';
+// import { getUsuarioId, putUsuario } from '../../services/usuarioService';
+// import swal from 'sweetalert2';
+import serverConfig from '../../config/server';
 
 
 export const UsuarioUpdate = () => {
 
-    const { usuarioId = '' } = useParams();
+    const params = useParams()
     const [ usuario, setUsuario ] = useState({})
     const [valoresForm, setValoresForm] = useState({})
     const { nombre = '', email = '', estado = '' } = valoresForm
 
+    //console.log(params)
+
     const getUsuario = async () => {
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick:false,
-                text: 'Cargando...'
-            });
-            swal.showLoading();
-            const { data } = await getUsuarioId(usuarioId);
-            console.log(data);
-            setUsuario(data) // se le agrega la data a inventario
-            swal.close()
-        } catch (error) {
-            console.log(error);
-            swal.close()
-        }
+        await fetch(`${serverConfig.urlBaseServer}/usuario/${params.usuarioId}`, {
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              method: "GET",
+        })
+            .then(res => res.json())
+            .then(data =>{
+                //console.log(data)
+                setUsuario(data.usuario)
+            })
     }
 
     useEffect(() => {
         getUsuario()
-    }, [usuarioId]);
+    }, []);
 
     useEffect(() => {
         if (usuario) {
@@ -53,28 +54,43 @@ export const UsuarioUpdate = () => {
         const usuarioUpdate = {
             nombre,email,estado
         }
+        //console.log(usuarioUpdate)
+
+        await fetch(`${serverConfig.urlBaseServer}/usuario/${params.usuarioId}/put`,
+        {
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        method: "PATCH",
+        body: JSON.stringify(usuarioUpdate),
+        })
+        .then(resp => resp.json())
+        .then(data=> {
+            console.log(data)
+        })
       
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading(); // se llama la alerta de cargando
-            const { data } = await putUsuario(usuarioId, usuarioUpdate )
-            console.log(data);
-            swal.close();
+        // try {
+        //     swal.fire({ // sirve para mostrar alerta de cargando 
+        //         allowOutsideClick: false,
+        //         text: 'Cargando...'
+        //     });
+        //     swal.showLoading(); // se llama la alerta de cargando
+        //     const { data } = await putUsuario(usuarioId, usuarioUpdate )
+        //     console.log(data);
+        //     swal.close();
       
-        } catch (error) {
-            console.log(error);
-            swal.close();
-            let mensaje;
-            if (error && error.response && error.response.data ) {
-                mensaje = error.response.data
-            }else{
-                mensaje = 'Ocurrio un error por favor intente de nuevo'
-            }
-            swal.fire('Error',mensaje,'error')
-        }
+        // } catch (error) {
+        //     console.log(error);
+        //     swal.close();
+        //     let mensaje;
+        //     if (error && error.response && error.response.data ) {
+        //         mensaje = error.response.data
+        //     }else{
+        //         mensaje = 'Ocurrio un error por favor intente de nuevo'
+        //     }
+        //     swal.fire('Error',mensaje,'error')
+        // }
       }
 
 

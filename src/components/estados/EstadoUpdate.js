@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import swal from 'sweetalert2';
 import { putEstadoEquipo, getEstadoEquipoId } from '../../services/estadoEquipoService';
+import serverConfig from '../../config/server';
 
 
 export const EstadoUpdate = () => {
@@ -12,20 +13,19 @@ export const EstadoUpdate = () => {
     const { nombre = '', estado = '' } = valoresForm
 
     const getEstado = async () => {
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading();
-            const { data } = await getEstadoEquipoId(estadoId);
-            console.log(data);
-            setEstadoNew(data) // se le agrega la data a inventario
-            swal.close()
-        } catch (error) {
-            console.log(error);
-            swal.close()
-        }
+
+        await fetch(`${serverConfig.urlBaseServer}/estado-equipo/${estadoId}`,{
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "GET",
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                setEstadoNew(data.estadoEquipo) // se le agrega la data a inventario
+            })
     }
 
     useEffect(() => {
@@ -53,27 +53,18 @@ export const EstadoUpdate = () => {
             nombre, estado
         }
 
-        try {
-            swal.fire({ // sirve para mostrar alerta de cargando 
-                allowOutsideClick: false,
-                text: 'Cargando...'
-            });
-            swal.showLoading(); // se llama la alerta de cargando
-            const { data } = await putEstadoEquipo(estadoId, estadoUpdate)
-            console.log(data);
-            swal.close();
+        await fetch(`${serverConfig.urlBaseServer}/estado-equipo/${estadoId}`,{
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            method: "PATCH",
+            body: JSON.stringify(estadoUpdate)
+            }).then(res=> res.json())
+            .then(data => {
+            console.log(data)
+        })
 
-        } catch (error) {
-            console.log(error);
-            swal.close();
-            let mensaje;
-            if (error && error.response && error.response.data) {
-                mensaje = error.response.data
-            } else {
-                mensaje = 'Ocurrio un error por favor intente de nuevo'
-            }
-            swal.fire('Error', mensaje, 'error')
-        }
     }
 
 
