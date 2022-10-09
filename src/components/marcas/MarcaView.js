@@ -15,12 +15,23 @@ export const MarcaView = () => {
  
 
   const listarMarcas = async () => {
-    try {
-      const { data } = await getMarcas()
-      setMarcas(data)
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   const { data } = await getMarcas()
+    //   setMarcas(data)
+    // } catch (error) {
+    //   console.log(error);
+    // }
+    await fetch(`${serverConfig.urlBaseServer}/marca/`,{
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    }).then(res => res.json())
+      .then(resp => {
+        //console.log(resp)
+        setMarcas(resp)
+      })
   }
 
   useEffect(() => {

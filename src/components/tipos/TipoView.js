@@ -13,12 +13,23 @@ export const TipoView = () => {
   const [tipo, setTipo] = useState({})
 
   const listarTipoEquipos = async () => {
-    try {
-        const { data } = await getTipoEquipos()
-        setTipoEquipos(data)
-    } catch (error) {
-        console.log(error);
-    }
+    // try {
+    //     const { data } = await getTipoEquipos()
+    //     setTipoEquipos(data)
+    // } catch (error) {
+    //     console.log(error);
+    // }
+    await fetch(`${serverConfig.urlBaseServer}/tipo-equipo/`,{
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    }).then(res => res.json())
+      .then(resp => {
+        //console.log(resp)
+        setTipoEquipos(resp)
+      })
 }
 
 useEffect( () => {

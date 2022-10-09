@@ -12,12 +12,23 @@ export const EstadosView = () => {
   const [estadoEquipo, setEstadoEquipo] = useState({})
 
   const listarEstadoEquipos = async () => {
-    try {
-        const { data } = await getEstadoEquipos()
-        setEstadoEquipos(data)
-    } catch (error) {
-        console.log(error);
-    }
+    // try {
+    //     const { data } = await getEstadoEquipos()
+    //     setEstadoEquipos(data)
+    // } catch (error) {
+    //     console.log(error);
+    // }
+    await fetch(`${serverConfig.urlBaseServer}/estado-equipo/`,{
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "GET",
+    }).then(res => res.json())
+      .then(resp => {
+        //console.log(resp)
+        setEstadoEquipos(resp)
+      })
 }
 
 useEffect( () => {
