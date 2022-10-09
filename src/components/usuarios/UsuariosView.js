@@ -16,7 +16,7 @@ export const UsuariosView = () => {
 
   const getUsuarios = async() => {
     // await fetch(`${serverConfig.urlBaseServer}/usuario/usuariolist`,{
-    await fetch(`http://localhost:4000/usuario/userlist`,{
+    await fetch(`${serverConfig.urlBaseServer}/usuario/userlist`,{
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
